@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ps">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نثار ده کریپټو تحلیلونو کور</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #27ae60;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1621411017406-9f290a85937e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 20px;
+            position: relative;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+        
+        nav ul li a:hover {
+            color: var(--accent-color);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        nav ul li a i {
+            margin-right: 8px;
+        }
+        
+        /* Dropdown menu */
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .dropdown-content a {
+            color: var(--dark-color);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: var(--light-color);
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1621411017406-9f290a85937e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: fadeInDown 1s ease;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        .btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #2980b9;
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+        }
+        
+        .stats {
+            background-color: white;
+            padding: 50px 0;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .stat-item {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            margin: 10px;
+            background-color: var(--light-color);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-10px);
+        }
+        
+        .stat-number {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 18px;
+            color: var(--dark-color);
+        }
+        
+        .course-info {
+            padding: 80px 0;
+            background-color: #f9f9f9;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .section-title h2 {
+            font-size: 36px;
+            color: var(--primary-color);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+        }
+        
+        .section-title h2::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--accent-color);
+        }
+        
+        .info-content {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+        
+        .info-text {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .info-text h3 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .info-text p {
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        
+        .info-image {
+            flex: 1;
+            min-width: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s;
+        }
+        
+        .info-image:hover img {
+            transform: scale(1.05);
+        }
+        
+        .payment-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            text-align: center;
+        }
+        
+        .payment-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .payment-container h2 {
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        
+        .price {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 20px 0;
+            color: var(--accent-color);
+        }
+        
+        .price span {
+            font-size: 24px;
+            color: white;
+        }
+        
+        .payment-methods {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .payment-methods h3 {
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            font-size: 24px;
+        }
+        
+        .payment-method {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .payment-method:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .payment-method h4 {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .payment-method h4 i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+        
+        .payment-method p {
+            margin-left: 30px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .copy-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--accent-color);
+        }
+        
+        .copy-btn i {
+            margin-right: 5px;
+        }
+        
+        .whatsapp-btn {
+            background-color: #25D366;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .whatsapp-btn i {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .whatsapp-btn:hover {
+            background-color: #128C7E;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+        }
+        
+        footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 50px 0 20px;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+        
+        .footer-section h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+        }
+        
+        .footer-section p {
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+        
+        .contact-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .contact-info i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+            }
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            nav ul li {
+                margin: 5px;
+            }
+            
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            .hero p {
+                font-size: 18px;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+            }
+            
+            .stat-item {
+                margin: 10px 0;
+            }
+            
+            .section-title h2 {
+                font-size: 30px;
+            }
+            
+            .price {
+                font-size: 36px;
+            }
+            
+            .dropdown-content {
+                right: auto;
+                left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-coins"></i>
+                    <span>نثار ده کریپټو تحلیلونو کور</span>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#about"><i class="fas fa-info-circle"></i> د کتاب په اړه</a></li>
+                        <li><a href="#payment"><i class="fas fa-shopping-cart"></i> د اخیستلو طریقه</a></li>
+                        <li class="dropdown">
+                            <a href="#"><i class="fas fa-bars"></i> مینو</a>
+                            <div class="dropdown-content">
+                                <a href="#about"><i class="fas fa-book"></i> د کورس په اړه</a>
+                                <a href="#payment"><i class="fas fa-money-bill-wave"></i> د تادیې لارې</a>
+                                <a href="https://wa.me/93700998926"><i class="fab fa-whatsapp"></i> اډمین سره اړیکه</a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="container">
+            <h1>د کریپټو بشپړ کورس په پښتو ژبه</h1>
+            <p>د کریپټو کرنسی مارکیټونو په اړه بشپړ پوهه او تحلیلونه زده کړئ او خپل پیسې په ښه توګه مدیریت کړئ</p>
+            <a href="#payment" class="btn">اوس واخلئ</a>
+        </div>
+    </section>
+    
+    <section class="stats">
+        <div class="container">
+            <h2>زموږ د کورس احصایې</h2>
+            <div class="stats-container">
+                <div class="stat-item">
+                    <div class="stat-number" id="student-count">0</div>
+                    <div class="stat-label">د کورس زده کوونکي</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="daily-students">0</div>
+                    <div class="stat-label">نن ورځ نوي زده کوونکي</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="total-income">0</div>
+                    <div class="stat-label">ټول عاید (USDT)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="course-info" id="about">
+        <div class="container">
+            <div class="section-title">
+                <h2>د کتاب په اړه</h2>
+            </div>
+            <div class="info-content">
+                <div class="info-text">
+                    <h3>نثار ده کریپټو تحلیلونو کورس</h3>
+                    <p>دا کتاب د کریپټو کرنسی مارکیټونو په اړه یو بشپړ لارښود دی چې په ساده پښتو ژبه لیکل شوی دی. په دې کتاب کې تاسو به د ټریډینګ بنسټیزې او پرمختللي تخنیکونه زده کړئ.</p>
+                    <p>کتاب د لاندې موضوعاتو په اړه بشپړ معلومات لري:</p>
+                    <ul style="margin-left: 20px; margin-bottom: 20px;">
+                        <li>د کریپټو مارکیټ پېژندنه او تاریخ</li>
+                        <li>د بلاکچین ټیکنالوجي پوهه</li>
+                        <li>د ټیکنیکي تحلیل بنسټیز اصول</li>
+                        <li>د کندلستیک تحلیل</li>
+                        <li>د رجحان تشخیص او تحلیل</li>
+                        <li>د رسیستنس او سپورټ لاینونه</li>
+                        <li>د فیبوناچي ریټریسمنټ</li>
+                        <li>د رسک مدیریت او رواني تحلیل</li>
+                    </ul>
+                    <p>دا کتاب د هغو کسانو لپاره ډېر ګټور دی چې غواړي په کریپټو مارکیټونو کې پوره پوهه ترلاسه کړي او خپلې پیسې په ښه توګه مدیریت کړي.</p>
+                </div>
+                <div class="info-image">
+                    <img src="https://images.unsplash.com/photo-1621411017406-9f290a85937e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Crypto Trading Course">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="payment-section" id="payment">
+        <div class="container">
+            <div class="payment-container">
+                <h2>د کتاب د اخیستلو طریقه</h2>
+                <p>د کتاب د اخیستلو لپاره لاندې قیمت تادیه کړئ او د کتاب لپاره به تاسو شامل سی  </p>
+                <div class="price">15 <span>USDT</span></div>
+                <div class="price">1000 <span>افغانی</span></div>
+                
+                <div class="payment-methods">
+                    <h3><i class="fas fa-money-bill-wave"></i> د تادیې لارې</h3>
+                    
+                    <div class="payment-method">
+                        <h4><i class="fas fa-mobile-alt"></i> ATOMA / Pay</h4>
+                        <p>
+                            شماره: 0777978868
+                            <button class="copy-btn" onclick="copyToClipboard('0777978868')"><i class="fas fa-copy"></i> کاپي</button>
+                        </p>
+                        <p>
+                            نوم: ROOHULLAH NISAR
+                            <button class="copy-btn" onclick="copyToClipboard('ROOHULLAH NISAR')"><i class="fas fa-copy"></i> کاپي</button>
+                        </p>
+                    </div>
+                    
+                    <div class="payment-method">
+                        <h4><i class="fas fa-wallet"></i> حساب پی</h4>
+                        <p>
+                            شماره: 0777978868
+                            <button class="copy-btn" onclick="copyToClipboard('0777978868')"><i class="fas fa-copy"></i> کاپي</button>
+                        </p>
+                        <p>
+                            نوم: ROOHULLAH NISAR
+                            <button class="copy-btn" onclick="copyToClipboard('ROOHULLAH NISAR')"><i class="fas fa-copy"></i> کاپي</button>
+                        </p>
+                    </div>
+                    
+                    <div class="payment-method">
+                        <h4><i class="fab fa-bitcoin"></i> Binance Pay</h4>
+                        <p>
+                            ID: 858260451
+                            <button class="copy-btn" onclick="copyToClipboard('858260451')"><i class="fas fa-copy"></i> کاپي</button>
+                        </p>
+                        <p>
+                            نوم: Roohullah Nisar
+                            <button class="copy-btn" onclick="copyToClipboard('Roohullah Nisar')"><i class="fas fa-copy"></i> کاپي</button>
+                        </p>
+                    </div>
+                    
+                    <div class="payment-method">
+                        <h4><i class="fab fa-ethereum"></i> USDT (BEP20)</h4>
+                        <p>
+                            آدرس: 0xc8632211868fc756e8127aca9ccc05c1e8ddac44
+                            <button class="copy-btn" onclick="copyToClipboard('0xc8632211868fc756e8127aca9ccc05c1e8ddac44')"><i class="fas fa-copy"></i> کاپي</button>
+                        </p>
+                    </div>
+                </div>
+                
+                <p>ده تادیی وروسته متن ده تادیی سکرین شاټ سره لاندی واتساپ نمبر ته ولیږی:</p>
+                <p>"ښاغلی استاد محترم ما کتاب لپاره تادیه وکړل هیله لرم چی ما هم لیست کی شامل کړی مننه"</p>
+                
+                <a href="https://wa.me/93700998926" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i> واتساپ پیغام
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>زموږ په اړه</h3>
+                    <p>نثار ده کریپټو تحلیلونو کورس یو بشپړ لارښود دی چې د کریپټو مارکیټونو په اړه په پښتو ژبه لیکل شوی دی.</p>
+                    <p>موخه یې د هېوادوالو لپاره د پیسو د مدیریت او سرمایه ګذاري مهارتونه زیاتول دي.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>اړیکه</h3>
+                    <div class="contact-info">
+                        <i class="fas fa-phone"></i>
+                        <p>+93 700 998 926</p>
+                    </div>
+                    <div class="contact-info">
+                        <i class="fab fa-whatsapp"></i>
+                        <p>واتساپ: +93 700 998 926</p>
+                    </div>
+                    <div class="contact-info">
+                        <i class="fas fa-envelope"></i>
+                        <p>info@nisarcrypto.com</p>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>ګټور لینکونه</h3>
+                    <p><a href="#about" style="color: white; text-decoration: none;"><i class="fas fa-book"></i> د کتاب په اړه</a></p>
+                    <p><a href="#payment" style="color: white; text-decoration: none;"><i class="fas fa-money-bill-wave"></i> د اخیستلو طریقه</a></p>
+                    <p><a href="https://wa.me/93700998926" style="color: white; text-decoration: none;"><i class="fab fa-whatsapp"></i> اډمین سره اړیکه</a></p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 نثار ده کریپټو تحلیلونو کورس. ټول حقونه خوندي دي.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4UbW_Iy4kUWH3V70Q1mWCI4-_KFk6ku4",
+            authDomain: "onlinewark-a0147.firebaseapp.com",
+            databaseURL: "https://onlinewark-a0147-default-rtdb.firebaseio.com",
+            projectId: "onlinewark-a0147",
+            storageBucket: "onlinewark-a0147.appspot.com",
+            messagingSenderId: "92155538620",
+            appId: "1:92155538620:android:5e198a8eea6bf17f61f4b9"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Function to update counters
+        function updateCounters() {
+            const studentsRef = database.ref('students');
+            const dailyStudentsRef = database.ref('dailyStudents');
+            const incomeRef = database.ref('income');
+            
+            studentsRef.on('value', (snapshot) => {
+                const count = snapshot.val();
+                animateCounter('student-count', count);
+            });
+            
+            dailyStudentsRef.on('value', (snapshot) => {
+                const count = snapshot.val();
+                animateCounter('daily-students', count);
+            });
+            
+            incomeRef.on('value', (snapshot) => {
+                const amount = snapshot.val();
+                animateCounter('total-income', amount);
+            });
+        }
+        
+        // Function to animate counter
+        function animateCounter(elementId, target) {
+            const element = document.getElementById(elementId);
+            const current = parseInt(element.innerText);
+            const increment = Math.ceil((target - current) / 50);
+            
+            if (current < target) {
+                element.innerText = current + increment;
+                setTimeout(() => {
+                    animateCounter(elementId, target);
+                }, 20);
+            } else {
+                element.innerText = target;
+            }
+        }
+        
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('کاپي شو: ' + text);
+            }).catch(err => {
+                console.error('د کاپي کولو په وخت کې ستونزه راغله:', err);
+            });
+        }
+        
+        // Initialize counters
+        window.onload = function() {
+            updateCounters();
+            
+            // Simulate daily updates (in a real app, this would come from Firebase)
+            setInterval(() => {
+                database.ref('dailyStudents').transaction((current) => {
+                    return (current || 0) + 1;
+                });
+                
+                database.ref('students').transaction((current) => {
+                    return (current || 0) + 1;
+                });
+                
+                database.ref('income').transaction((current) => {
+                    return (current || 0) + 15;
+                });
+            }, 86400000); // 24 hours in milliseconds
+        };
+    </script>
+</body>
+</html> 
